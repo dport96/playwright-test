@@ -15,6 +15,12 @@ jobs:
           node-version: lts/*
       - name: Install dependencies
         run: npm ci
+      - name: Build application
+        run: npm run build # Or your build command
+      - name: Start application (in background)
+        run: npm run start & # Or your start command
+      - name: Wait for application to start
+        run: npx wait-on http://localhost:3000 --timeout 60000 # Adjust timeout
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: Run ESLint
