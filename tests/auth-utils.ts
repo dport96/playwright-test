@@ -34,6 +34,23 @@ function getUniqueValues(array: string[]): string[] {
 }
 
 /**
+ * Helper function to safely get error message and stack
+ */
+function getErrorDetails(error: unknown): { message: string; stack: string } {
+  if (error instanceof Error) {
+    return { 
+      message: error.message,
+      stack: error.stack || 'No stack trace available'
+    };
+  }
+  
+  return {
+    message: String(error),
+    stack: 'No stack trace available'
+  };
+}
+
+/**
  * Authenticate using the UI with robust waiting and error handling
  */
 async function authenticateWithUI(
@@ -97,7 +114,7 @@ async function authenticateWithUI(
         try {
           return { name: check.name, visible: await check.check.catch(() => false) };
         } catch (e) {
-          return { name: check.name, visible: false, error: e };
+          return { name: check.name, visible: false, error: String(e) };
         }
       });
       
@@ -122,7 +139,8 @@ async function authenticateWithUI(
           await page.screenshot({ path: screenshotPath, fullPage: true });
           console.log(`[AUTH] Session restoration screenshot saved to ${screenshotPath}`);
         } catch (screenshotError) {
-          console.log(`[AUTH] Failed to take screenshot: ${screenshotError}`);
+          const errorDetails = getErrorDetails(screenshotError);
+          console.log(`[AUTH] Failed to take screenshot: ${errorDetails.message}`);
         }
         
         return; // Exit early - session successfully restored
@@ -141,14 +159,16 @@ async function authenticateWithUI(
           await page.screenshot({ path: screenshotPath, fullPage: true });
           console.log(`[AUTH] Failed restoration screenshot saved to ${screenshotPath}`);
         } catch (screenshotError) {
-          console.log(`[AUTH] Failed to take screenshot: ${screenshotError}`);
+          const errorDetails = getErrorDetails(screenshotError);
+          console.log(`[AUTH] Failed to take screenshot: ${errorDetails.message}`);
         }
       }
       
       console.log(`[AUTH] × Saved session for ${email} appears to be invalid or expired, re-authenticating...`);
     } catch (error) {
-      console.log(`[AUTH] × Error restoring session: ${error}`);
-      console.log(`[AUTH] Stack trace: ${error.stack || 'No stack trace available'}`);
+      const errorDetails = getErrorDetails(error);
+      console.log(`[AUTH] × Error restoring session: ${errorDetails.message}`);
+      console.log(`[AUTH] Stack trace: ${errorDetails.stack}`);
     }
   } else {
     console.log(`[AUTH] No existing session found at ${sessionPath}`);
@@ -171,7 +191,8 @@ async function authenticateWithUI(
         await page.screenshot({ path: screenshotPath, fullPage: true });
         console.log(`[AUTH] Pre-login screenshot saved to ${screenshotPath}`);
       } catch (screenshotError) {
-        console.log(`[AUTH] Failed to take screenshot: ${screenshotError}`);
+        const errorDetails = getErrorDetails(screenshotError);
+        console.log(`[AUTH] Failed to take screenshot: ${errorDetails.message}`);
       }
     }
 
@@ -223,7 +244,8 @@ async function authenticateWithUI(
         await page.screenshot({ path: screenshotPath, fullPage: true });
         console.log(`[AUTH] Post-login screenshot saved to ${screenshotPath}`);
       } catch (screenshotError) {
-        console.log(`[AUTH] Failed to take screenshot: ${screenshotError}`);
+        const errorDetails = getErrorDetails(screenshotError);
+        console.log(`[AUTH] Failed to take screenshot: ${errorDetails.message}`);
       }
     }
 
@@ -270,8 +292,9 @@ async function authenticateWithUI(
     
     console.log(`[AUTH] ✓ Successfully authenticated ${email} and saved session`);
   } catch (error) {
-    console.error(`[AUTH] × Authentication failed for ${email}:`, error);
-    console.log(`[AUTH] Error stack: ${error.stack || 'No stack trace available'}`);
+    const errorDetails = getErrorDetails(error);
+    console.error(`[AUTH] × Authentication failed for ${email}:`, errorDetails.message);
+    console.log(`[AUTH] Error stack: ${errorDetails.stack}`);
     
     // Capture page state for debugging
     if (DEBUG_SESSION) {
@@ -287,11 +310,12 @@ async function authenticateWithUI(
         await page.screenshot({ path: screenshotPath, fullPage: true });
         console.log(`[AUTH] Failure screenshot saved to ${screenshotPath}`);
       } catch (debugError) {
-        console.log(`[AUTH] Failed to capture debug info: ${debugError}`);
+        const debugErrorDetails = getErrorDetails(debugError);
+        console.log(`[AUTH] Failed to capture debug info: ${debugErrorDetails.message}`);
       }
     }
     
-    throw new Error(`Authentication failed: ${error}`);
+    throw new Error(`Authentication failed: ${errorDetails.message}`);
   }
 }
 
@@ -330,9 +354,10 @@ async function fillFormWithRetry(
         break;
       } catch (error) {
         attempts++;
-        console.log(`[AUTH] Error filling field ${field.selector} (attempt ${attempts}/${maxAttempts}): ${error}`);
+        const errorDetails = getErrorDetails(error);
+        console.log(`[AUTH] Error filling field ${field.selector} (attempt ${attempts}/${maxAttempts}): ${errorDetails.message}`);
         if (attempts >= maxAttempts) {
-          throw new Error(`Failed to fill field ${field.selector} after ${maxAttempts} attempts: ${error}`);
+          throw new Error(`Failed to fill field ${field.selector} after ${maxAttempts} attempts: ${errorDetails.message}`);
         }
         await page.waitForTimeout(500);
       }
