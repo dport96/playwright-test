@@ -10,6 +10,7 @@ const SESSION_STORAGE_PATH = path.join(__dirname, 'playwright-auth-sessions');
 
 // Ensure session directory exists
 if (!fs.existsSync(SESSION_STORAGE_PATH)) {
+  console.log(`Creating session storage ${SESSION_STORAGE_PATH}`);
   fs.mkdirSync(SESSION_STORAGE_PATH, { recursive: true });
 }
 
@@ -17,6 +18,7 @@ if (!fs.existsSync(SESSION_STORAGE_PATH)) {
 interface AuthFixtures {
   getUserPage: (email: string, password: string) => Promise<Page>;
 }
+
 /**
  * Authenticate using the UI with robust waiting and error handling
  */
@@ -49,17 +51,19 @@ async function authenticateWithUI(
       ]);
 
       if (isAuthenticated) {
-        console.log(`✓ Restored session for ${email}`);
-        return;
+        console.log(`✓ Successfully restored session for ${email}`);
+        return; // Exit early - session successfully restored, no need to re-authenticate
       }
 
       console.log(`× Saved session for ${email} expired, re-authenticating...`);
     } catch (error) {
       console.log(`× Error restoring session: ${error}`);
     }
+  } else {
+    console.log(`No existing session found for ${email}, authenticating...`);
   }
 
-  // If session restoration fails, authenticate via UI
+  // If session restoration fails or doesn't exist, authenticate via UI
   try {
     console.log(`→ Authenticating ${email} via UI...`);
 
@@ -105,7 +109,6 @@ async function authenticateWithUI(
     console.log(`✓ Successfully authenticated ${email} and saved session`);
   } catch (error) {
     console.error(`× Authentication failed for ${email}:`, error);
-
     throw new Error(`Authentication failed: ${error}`);
   }
 }
