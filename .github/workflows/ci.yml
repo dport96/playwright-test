@@ -1,4 +1,4 @@
-name: ci-nextjs-application-template
+name: ci-playwright-test
 on:
   push:
     branches: [main, master]

@@ -21,6 +21,19 @@ interface AuthFixtures {
 }
 
 /**
+ * Helper function to get unique array values without using Set spread operator
+ */
+function getUniqueValues(array: string[]): string[] {
+  const uniqueValues: string[] = [];
+  array.forEach(item => {
+    if (uniqueValues.indexOf(item) === -1) {
+      uniqueValues.push(item);
+    }
+  });
+  return uniqueValues;
+}
+
+/**
  * Authenticate using the UI with robust waiting and error handling
  */
 async function authenticateWithUI(
@@ -54,8 +67,8 @@ async function authenticateWithUI(
       
       console.log(`[AUTH] Found ${sessionData.cookies.length} cookies in session file`);
       
-      // Log cookie domains for debugging
-      const cookieDomains = [...new Set(sessionData.cookies.map(c => c.domain))];
+      // Log cookie domains for debugging - using our helper function instead of Set
+      const cookieDomains = getUniqueValues(sessionData.cookies.map((c: any) => c.domain));
       console.log(`[AUTH] Cookie domains in session: ${cookieDomains.join(', ')}`);
       
       // Add cookies to browser context
@@ -247,7 +260,7 @@ async function authenticateWithUI(
     if (cookies.length === 0) {
       console.log(`[AUTH] Warning: No cookies available to save`);
     } else {
-      const cookieDomains = [...new Set(cookies.map(c => c.domain))];
+      const cookieDomains = getUniqueValues(cookies.map(c => c.domain));
       console.log(`[AUTH] Cookie domains being saved: ${cookieDomains.join(', ')}`);
     }
     
