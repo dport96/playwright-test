@@ -6,7 +6,7 @@ test('test access to admin page', async ({ getUserPage }) => {
   const adminPage = await getUserPage('admin@foo.com', 'changeme');
 
   // Navigate to the home adminPage
-  await adminPage.goto('http://localhost:3000/');
+  await adminPage.goto('/');
   
   // Check for navigation elements
   await expect(adminPage.getByRole('link', { name: 'Next.js Application Template' })).toBeVisible();

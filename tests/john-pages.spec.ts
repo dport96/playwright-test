@@ -6,7 +6,7 @@ test('can authenticate a specific user', async ({ getUserPage }) => {
   const customUserPage = await getUserPage('john@foo.com', 'changeme');
 
   // Navigate to the home customUserPage
-  await customUserPage.goto('http://localhost:3000/');
+  await customUserPage.goto('/');
   await expect(customUserPage.getByRole('link', { name: 'Add Stuff' })).toBeVisible();
   await expect(customUserPage.getByRole('link', { name: 'List Stuff' })).toBeVisible();
   await expect(customUserPage.getByRole('button', { name: 'john@foo.com' })).toBeVisible();
