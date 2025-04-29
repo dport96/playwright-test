@@ -7,7 +7,7 @@ import path from 'path';
 // Base configuration
 const BASE_URL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000';
 const SESSION_STORAGE_PATH = path.join(__dirname, 'playwright-auth-sessions');
-const DEBUG_SESSION = process.env.DEBUG_SESSION === 'true';
+const DEBUG_SESSION = true; // process.env.DEBUG_SESSION === 'true';
 
 // Ensure session directory exists
 if (!fs.existsSync(SESSION_STORAGE_PATH)) {
