@@ -11,6 +11,10 @@ const BASE_URL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000'
 const SESSION_STORAGE_PATH = path.join(__dirname, 'playwright-auth-sessions');
 const DEBUG_SESSION = true;
 
+interface AuthFixtures {
+  getUserPage: (email: string, password: string) => Promise<Page>;
+}
+
 // Ensure session directory exists
 if (!fs.existsSync(SESSION_STORAGE_PATH)) {
   fs.mkdirSync(SESSION_STORAGE_PATH, { recursive: true });
