@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import type { PlaywrightTestConfig } from '@playwright/test';
 import { devices } from '@playwright/test';
 
@@ -40,7 +41,7 @@ const config: PlaywrightTestConfig = {
 
   /* Run your local dev server before starting the tests */
   webServer: process.env.CI ? undefined : {
-    command: `npm run dev`,
+    command: 'npm run dev',
     url: BASE_URL,
     timeout: 120 * 1000,
     reuseExistingServer: true,
@@ -67,7 +68,7 @@ const config: PlaywrightTestConfig = {
         ...devices['Desktop Safari'],
       },
     },
-/*
+    /*
     // Test against mobile viewports.
     {
       name: 'Mobile Chrome',

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable max-len */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable import/no-extraneous-dependencies */
 import { test as base, expect, Page } from '@playwright/test';
@@ -38,15 +40,15 @@ function getUniqueValues(array: string[]): string[] {
  */
 function getErrorDetails(error: unknown): { message: string; stack: string } {
   if (error instanceof Error) {
-    return { 
+    return {
       message: error.message,
-      stack: error.stack || 'No stack trace available'
+      stack: error.stack || 'No stack trace available',
     };
   }
-  
+
   return {
     message: String(error),
-    stack: 'No stack trace available'
+    stack: 'No stack trace available',
   };
 }
 
@@ -57,58 +59,58 @@ async function authenticateWithUI(
   page: Page,
   email: string,
   password: string,
-  sessionName: string
+  sessionName: string,
 ): Promise<void> {
   const sessionPath = path.join(SESSION_STORAGE_PATH, `${sessionName}.json`);
   console.log(`[AUTH] Looking for session file: ${sessionPath}`);
-  
+
   // Try to restore session from storage if available
   if (fs.existsSync(sessionPath)) {
     console.log(`[AUTH] Session file found for ${email}. Attempting to restore...`);
-    
+
     try {
       // Read and parse session data
       const sessionFileContent = fs.readFileSync(sessionPath, 'utf8');
       console.log(`[AUTH] Session file size: ${sessionFileContent.length} bytes`);
-      
+
       if (DEBUG_SESSION) {
         console.log(`[AUTH] Session file content: ${sessionFileContent.substring(0, 100)}...`);
       }
-      
+
       const sessionData = JSON.parse(sessionFileContent);
-      
+
       if (!sessionData.cookies || !Array.isArray(sessionData.cookies) || sessionData.cookies.length === 0) {
         console.log(`[AUTH] Session file does not contain valid cookies array. Found: ${JSON.stringify(sessionData).substring(0, 100)}...`);
         throw new Error('Invalid session data structure');
       }
-      
+
       console.log(`[AUTH] Found ${sessionData.cookies.length} cookies in session file`);
-      
+
       // Log cookie domains for debugging - using our helper function instead of Set
       const cookieDomains = getUniqueValues(sessionData.cookies.map((c: any) => c.domain));
       console.log(`[AUTH] Cookie domains in session: ${cookieDomains.join(', ')}`);
-      
+
       // Add cookies to browser context
       await page.context().addCookies(sessionData.cookies);
-      console.log(`[AUTH] Cookies added to browser context`);
+      console.log('[AUTH] Cookies added to browser context');
 
       // Navigate to homepage to verify session
       console.log(`[AUTH] Navigating to ${BASE_URL} to verify session`);
       await page.goto(BASE_URL);
       await page.waitForLoadState('networkidle');
-      console.log(`[AUTH] Page loaded, checking authentication state`);
+      console.log('[AUTH] Page loaded, checking authentication state');
 
       // Check if we're authenticated
       const authChecks = [
-        { name: "email text", check: page.getByText(email).isVisible() },
-        { name: "email button", check: page.getByRole('button', { name: email }).isVisible() },
-        { name: "sign out text", check: page.getByText('Sign out').isVisible() },
-        { name: "sign out button", check: page.getByRole('button', { name: 'Sign out' }).isVisible() }
+        { name: 'email text', check: page.getByText(email).isVisible() },
+        { name: 'email button', check: page.getByRole('button', { name: email }).isVisible() },
+        { name: 'sign out text', check: page.getByText('Sign out').isVisible() },
+        { name: 'sign out button', check: page.getByRole('button', { name: 'Sign out' }).isVisible() },
       ];
-      
+
       // Log what we're looking for
       console.log(`[AUTH] Checking for authenticated elements: ${authChecks.map(c => c.name).join(', ')}`);
-      
+
       // Execute all checks in parallel with a timeout
       const authCheckPromises = authChecks.map(async check => {
         try {
@@ -117,22 +119,22 @@ async function authenticateWithUI(
           return { name: check.name, visible: false, error: String(e) };
         }
       });
-      
+
       const authCheckResults = await Promise.all(authCheckPromises);
       console.log(`[AUTH] Auth check results: ${JSON.stringify(authCheckResults)}`);
-      
+
       const isAuthenticated = authCheckResults.some(result => result.visible === true);
 
       if (isAuthenticated) {
         console.log(`[AUTH] ✓ Successfully restored session for ${email}`);
-        
+
         // Capture page HTML for debugging if needed
         if (DEBUG_SESSION) {
           const pageContent = await page.content();
           console.log(`[AUTH] Page content length: ${pageContent.length} bytes`);
           console.log(`[AUTH] Page title: "${await page.title()}"`);
         }
-        
+
         // Take screenshot for visual debugging in CI
         try {
           const screenshotPath = path.join(SESSION_STORAGE_PATH, `${sessionName}-restored.png`);
@@ -142,18 +144,18 @@ async function authenticateWithUI(
           const errorDetails = getErrorDetails(screenshotError);
           console.log(`[AUTH] Failed to take screenshot: ${errorDetails.message}`);
         }
-        
+
         return; // Exit early - session successfully restored
       }
 
-      console.log(`[AUTH] × Session restoration attempt failed - no authentication indicators found on page`);
-      
+      console.log('[AUTH] × Session restoration attempt failed - no authentication indicators found on page');
+
       // Capture current cookies for debugging
       const currentCookies = await page.context().cookies();
       console.log(`[AUTH] Current cookies count after restoration attempt: ${currentCookies.length}`);
-      
+
       if (DEBUG_SESSION) {
-        // Take screenshot of failed restoration 
+        // Take screenshot of failed restoration
         try {
           const screenshotPath = path.join(SESSION_STORAGE_PATH, `${sessionName}-restoration-failed.png`);
           await page.screenshot({ path: screenshotPath, fullPage: true });
@@ -163,7 +165,7 @@ async function authenticateWithUI(
           console.log(`[AUTH] Failed to take screenshot: ${errorDetails.message}`);
         }
       }
-      
+
       console.log(`[AUTH] × Saved session for ${email} appears to be invalid or expired, re-authenticating...`);
     } catch (error) {
       const errorDetails = getErrorDetails(error);
@@ -182,7 +184,7 @@ async function authenticateWithUI(
     console.log(`[AUTH] Navigating to ${BASE_URL}/auth/signin`);
     await page.goto(`${BASE_URL}/auth/signin`);
     await page.waitForLoadState('networkidle');
-    console.log(`[AUTH] Login page loaded`);
+    console.log('[AUTH] Login page loaded');
 
     // Take screenshot before login attempt
     if (DEBUG_SESSION) {
@@ -197,45 +199,45 @@ async function authenticateWithUI(
     }
 
     // Fill in credentials with retry logic
-    console.log(`[AUTH] Filling login form fields`);
+    console.log('[AUTH] Filling login form fields');
     await fillFormWithRetry(page, [
       { selector: 'input[name="email"]', value: email },
       { selector: 'input[name="password"]', value: password },
     ]);
 
     // Click submit button and wait for navigation
-    console.log(`[AUTH] Looking for sign-in button`);
+    console.log('[AUTH] Looking for sign-in button');
     const submitButton = page.getByRole('button', { name: /sign[ -]?in/i });
     const isSubmitVisible = await submitButton.isVisible({ timeout: 1000 }).catch(() => false);
-    
+
     if (!isSubmitVisible) {
-      console.log(`[AUTH] Primary sign-in button not found, trying alternative login button`);
+      console.log('[AUTH] Primary sign-in button not found, trying alternative login button');
       const altButton = page.getByRole('button', { name: /log[ -]?in/i });
       const isAltVisible = await altButton.isVisible({ timeout: 1000 }).catch(() => false);
-      
+
       if (isAltVisible) {
-        console.log(`[AUTH] Alternative login button found, clicking`);
+        console.log('[AUTH] Alternative login button found, clicking');
         await altButton.click();
       } else {
-        console.log(`[AUTH] No login buttons found, attempting to locate any submit buttons`);
+        console.log('[AUTH] No login buttons found, attempting to locate any submit buttons');
         // Last resort - try to find any button that might be a submit
         const anySubmit = page.locator('button[type="submit"]');
         if (await anySubmit.count() > 0) {
-          console.log(`[AUTH] Found submit button, clicking`);
+          console.log('[AUTH] Found submit button, clicking');
           await anySubmit.first().click();
         } else {
           throw new Error('No login/submit buttons found on page');
         }
       }
     } else {
-      console.log(`[AUTH] Found sign-in button, clicking`);
+      console.log('[AUTH] Found sign-in button, clicking');
       await submitButton.click();
     }
 
     // Wait for navigation to complete
-    console.log(`[AUTH] Waiting for navigation after login submission`);
+    console.log('[AUTH] Waiting for navigation after login submission');
     await page.waitForLoadState('networkidle');
-    console.log(`[AUTH] Page loaded after login attempt`);
+    console.log('[AUTH] Page loaded after login attempt');
 
     // Take screenshot after login attempt
     if (DEBUG_SESSION) {
@@ -250,7 +252,7 @@ async function authenticateWithUI(
     }
 
     // Verify authentication was successful
-    console.log(`[AUTH] Verifying authentication success`);
+    console.log('[AUTH] Verifying authentication success');
     await expect(async () => {
       const authCheckPromises = [
         page.getByText(email).isVisible().then(visible => ({ success: visible, element: 'email text' })),
@@ -258,54 +260,54 @@ async function authenticateWithUI(
         page.getByText('Sign out').isVisible().then(visible => ({ success: visible, element: 'sign out text' })),
         page.getByRole('button', { name: 'Sign out' }).isVisible().then(visible => ({ success: visible, element: 'sign out button' })),
       ];
-      
+
       const results = await Promise.allSettled(authCheckPromises);
       const fulfilledResults = results
         .filter(r => r.status === 'fulfilled')
         .map(r => r.value);
-      
+
       // Log individual results
       fulfilledResults.forEach(result => {
         console.log(`[AUTH] Auth check for "${result.element}": ${result.success ? 'visible' : 'not visible'}`);
       });
-      
+
       const authState = fulfilledResults.find(r => r.success) || { success: false };
-      
+
       expect(authState.success).toBeTruthy();
     }).toPass({ timeout: 10000 });
 
     // Save session for future tests
-    console.log(`[AUTH] Authentication successful, saving session`);
+    console.log('[AUTH] Authentication successful, saving session');
     const cookies = await page.context().cookies();
     console.log(`[AUTH] Captured ${cookies.length} cookies to save`);
-    
+
     if (cookies.length === 0) {
-      console.log(`[AUTH] Warning: No cookies available to save`);
+      console.log('[AUTH] Warning: No cookies available to save');
     } else {
       const cookieDomains = getUniqueValues(cookies.map(c => c.domain));
       console.log(`[AUTH] Cookie domains being saved: ${cookieDomains.join(', ')}`);
     }
-    
+
     const sessionData = { cookies };
     fs.writeFileSync(sessionPath, JSON.stringify(sessionData));
     console.log(`[AUTH] Session saved to ${sessionPath} (${fs.statSync(sessionPath).size} bytes)`);
-    
+
     console.log(`[AUTH] ✓ Successfully authenticated ${email} and saved session`);
   } catch (error) {
     const errorDetails = getErrorDetails(error);
     console.error(`[AUTH] × Authentication failed for ${email}:`, errorDetails.message);
     console.log(`[AUTH] Error stack: ${errorDetails.stack}`);
-    
+
     // Capture page state for debugging
     if (DEBUG_SESSION) {
       try {
         console.log(`[AUTH] Page URL at failure: ${page.url()}`);
         console.log(`[AUTH] Page title at failure: "${await page.title()}"`);
-        
+
         const pageContent = await page.content();
-        const contentPreview = pageContent.substring(0, 500) + '... [truncated]';
+        const contentPreview = `${pageContent.substring(0, 500)}... [truncated]`;
         console.log(`[AUTH] Page content preview at failure: ${contentPreview}`);
-        
+
         const screenshotPath = path.join(SESSION_STORAGE_PATH, `${sessionName}-auth-failure.png`);
         await page.screenshot({ path: screenshotPath, fullPage: true });
         console.log(`[AUTH] Failure screenshot saved to ${screenshotPath}`);
@@ -314,7 +316,7 @@ async function authenticateWithUI(
         console.log(`[AUTH] Failed to capture debug info: ${debugErrorDetails.message}`);
       }
     }
-    
+
     throw new Error(`Authentication failed: ${errorDetails.message}`);
   }
 }
@@ -324,7 +326,7 @@ async function authenticateWithUI(
  */
 async function fillFormWithRetry(
   page: Page,
-  fields: Array<{ selector: string; value: string }>
+  fields: Array<{ selector: string; value: string }>,
 ): Promise<void> {
   for (const field of fields) {
     let attempts = 0;
@@ -334,7 +336,7 @@ async function fillFormWithRetry(
       try {
         console.log(`[AUTH] Filling field ${field.selector} (attempt ${attempts + 1}/${maxAttempts})`);
         const element = page.locator(field.selector);
-        
+
         const isVisible = await element.isVisible({ timeout: 2000 }).catch(() => false);
         if (!isVisible) {
           console.log(`[AUTH] Field ${field.selector} not visible, retrying...`);
@@ -342,7 +344,7 @@ async function fillFormWithRetry(
           await page.waitForTimeout(500);
           continue;
         }
-        
+
         await element.waitFor({ state: 'visible', timeout: 2000 });
         console.log(`[AUTH] Clearing field ${field.selector}`);
         await element.clear();
