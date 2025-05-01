@@ -10,14 +10,14 @@ jobs:
       postgres:
         image: postgres
         env:
-          POSTGRES_PASSWORD: postgres  # Matches client.js password
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-        ports:
-          - 5432:5432  # Explicit port mapping
 
     steps:
       - name: Check out repository code
@@ -26,12 +26,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Wait for PostgreSQL
+      - name: Install PostgreSQL client tools
         run: |
-          timeout 30 bash -c 'until pg_isready -h postgres -U postgres; do sleep 1; done'
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
 
-      - name: Connect to PostgreSQL
+      - name: Wait for PostgreSQL readiness
+        run: |
+          pg_isready -h postgres -U postgres -d postgres -t 30
+
+      - name: Run database operations
         run: node client.js
         env:
-          POSTGRES_HOST: postgres  # Use service name as host
+          POSTGRES_HOST: postgres  # Service container name
           POSTGRES_PORT: 5432
