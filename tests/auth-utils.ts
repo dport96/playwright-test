@@ -18,7 +18,12 @@ if (!fs.existsSync(SESSION_STORAGE_PATH)) {
 
 // Helper functions
 function getUniqueValues(array: string[]): string[] {
-  return [...new Set(array)];
+  const seen = new Set<string>();
+  return array.filter(item => {
+    if (seen.has(item)) return false;
+    seen.add(item);
+    return true;
+  });
 }
 
 function getErrorDetails(error: unknown): { message: string; stack: string } {
