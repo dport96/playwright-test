@@ -133,14 +133,16 @@ async function authenticateWithUI(page: Page, email: string, password: string, s
   }
 
   // Error page handling
-  await page.waitForURL(url => !url.includes('/auth/error'), { timeout: 10000 })
-    .catch(async error => {
-      if (page.url().includes('/auth/error')) {
-        const errorMsg = await page.locator('[role="alert"]').textContent() || 'Unknown error';
-        throw new Error(`Auth error page: ${errorMsg}`);
-      }
-      throw error;
-    });
+await page.waitForURL(url => !url.pathname.startsWith('/auth/error'), { timeout: 10000 })
+  .catch(async error => {
+    const currentUrl = new URL(page.url());
+    if (currentUrl.pathname.startsWith('/auth/error')) {
+      const errorMsg = await page.locator('[role="alert"]').textContent() || 'Unknown error';
+      throw new Error(`Auth error page: ${errorMsg}`);
+    }
+    throw error;
+  });
+
 
   // Save updated session
   const cookies = await page.context().cookies();
