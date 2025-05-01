@@ -28,8 +28,7 @@ jobs:
 
       - name: Install PostgreSQL client tools
         run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client
+          apt-get update && apt-get install -y postgresql-client
 
       - name: Wait for PostgreSQL readiness
         run: |
@@ -38,5 +37,5 @@ jobs:
       - name: Run database operations
         run: node client.js
         env:
-          POSTGRES_HOST: postgres  # Service container name
+          POSTGRES_HOST: postgres
           POSTGRES_PORT: 5432
