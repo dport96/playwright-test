@@ -1,12 +1,11 @@
+// john-pages.spec.ts
 import { test, expect } from './auth-utils';
 
-test.slow();
-test('can authenticate a specific user', async ({ getUserPage }) => {
-  // Call the getUserPage fixture with users signin info to get authenticated session for user
-  const customUserPage = await getUserPage('john@foo.com', 'changeme');
-
-  // Navigate to the home customUserPage
-  await customUserPage.goto('/');
+test('can authenticate john', async ({ getUserPage }) => {
+  const userPage = await getUserPage('john@foo.com', 'changeme');
+  
+  await userPage.goto('/');
+  await expect(userPage.getByRole('button', { name: 'john@foo.com' })).toBeVisible();
   await expect(customUserPage.getByRole('link', { name: 'Add Stuff' })).toBeVisible();
   await expect(customUserPage.getByRole('link', { name: 'List Stuff' })).toBeVisible();
   await expect(customUserPage.getByRole('button', { name: 'john@foo.com' })).toBeVisible();
@@ -15,3 +14,5 @@ test('can authenticate a specific user', async ({ getUserPage }) => {
   await customUserPage.getByRole('link', { name: 'List Stuff' }).click();
   await expect(customUserPage.getByRole('heading', { name: 'Stuff' })).toBeVisible();
 });
+
+
