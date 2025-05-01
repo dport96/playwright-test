@@ -46,13 +46,14 @@ async function verifyCredentials(email: string, password: string): Promise<void>
 
 async function fillFormWithRetry(page: Page, fields: Array<{ selector: string; value: string }>): Promise<void> {
   // Capture hidden fields
-  const hiddenFields = await page.$$eval('input[type="hidden"]', inputs =>
-    inputs.map(input => ({
+const hiddenFields = await page.$$eval('input[type="hidden"]', inputs =>
+  inputs
+    .filter((input): input is HTMLInputElement => input instanceof HTMLInputElement)
+    .map(input => ({
       selector: `input[name="${input.name}"]`,
       value: input.value
     }))
-  );
-
+);
   for (const field of [...hiddenFields, ...fields]) {
     let attempts = 0;
     while (attempts < 3) {
