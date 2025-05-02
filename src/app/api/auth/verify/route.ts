@@ -1,10 +1,11 @@
+/* eslint-disable import/extensions */
 // src/app/api/auth/verify/route.ts
 
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcrypt';
+import { prisma } from '@/lib/prisma';
 
-export async function POST(request: Request) {
+export default async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
 
@@ -12,33 +13,32 @@ export async function POST(request: Request) {
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Find user
     const user = await prisma.user.findUnique({
       where: { email },
-      select: { password: true }
+      select: { password: true },
     });
 
     if (!user) {
       return NextResponse.json(
         { error: 'Invalid credentials' },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     // Compare passwords
     const isValid = await bcrypt.compare(password, user.password);
-    
-    return NextResponse.json({ valid: isValid });
 
+    return NextResponse.json({ valid: isValid });
   } catch (error) {
     console.error('Verification error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
