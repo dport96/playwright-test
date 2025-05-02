@@ -1,19 +1,16 @@
 import { PrismaClient } from '@prisma/client';
 
-// PrismaClient is attached to the `global` object in development to prevent
-// exhausting your database connection limit.
-//
-// Learn more:
-// https://pris.ly/d/help/next-js-best-practices
+declare global {
+  // eslint-disable-next-line no-var
+  var prisma: PrismaClient | undefined;
+}
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
-
-// eslint-disable-next-line import/prefer-default-export, operator-linebreak
 export const prisma =
-  // eslint-disable-next-line operator-linebreak
-  globalForPrisma.prisma ||
+  global.prisma ||
   new PrismaClient({
-    log: ['query'], // CAM: is this the right level of logging?
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   });
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV !== 'production') {
+  global.prisma = prisma;
+}
