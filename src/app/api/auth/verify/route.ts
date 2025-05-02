@@ -1,11 +1,11 @@
 /* eslint-disable import/extensions */
 // src/app/api/auth/verify/route.ts
-
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import { prisma } from '@/lib/prisma';
 
-export default async function POST(request: Request) {
+// eslint-disable-next-line import/prefer-default-export
+export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
 
