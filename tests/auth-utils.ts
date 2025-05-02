@@ -37,14 +37,27 @@ function getErrorDetails(error: unknown): { message: string; stack: string } {
 }
 
 async function verifyCredentials(email: string, password: string): Promise<void> {
-  const response = await fetch(`${BASE_URL}/api/auth/verify`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
-  });
+  const verifyUrl = `${BASE_URL}/api/auth/verify`;
+  console.log(`[AUTH] Verifying credentials at: ${verifyUrl}`);
+  
+  try {
+    const response = await fetch(verifyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
 
-  if (!response.ok) {
-    throw new Error('Invalid test credentials');
+    console.log(`[AUTH] Verification response status: ${response.status}`);
+    
+    if (!response.ok) {
+      const responseBody = await response.text();
+      console.error(`[AUTH] Verification failed: ${responseBody}`);
+      throw new Error(`Credential verification failed (${response.status})`);
+    }
+  } catch (error) {
+    const errorDetails = getErrorDetails(error);
+    console.error(`[AUTH] Verification error: ${errorDetails.message}`);
+    throw new Error('Credential verification unavailable');
   }
 }
 
