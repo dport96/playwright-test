@@ -13,16 +13,14 @@ const config: PlaywrightTestConfig = {
   /* Maximum time one test can run for. */
   timeout: 30 * 1000,
   expect: {
-    /**
-     * Maximum time expect() should wait for the condition to be met.
-     * For example in `await expect(locator).toHaveText();`
-     */
-    timeout: 0, // no timeout
+    timeout: 0,
   },
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
+  /* Add global setup */
+  globalSetup: require.resolve('./tests/setup.ts'),
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
