@@ -20,7 +20,7 @@ const config: PlaywrightTestConfig = {
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Add global setup */
-  globalSetup: require.resolve('./tests/setup.ts'),
+  globalSetup: './tests/setup.ts',
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
