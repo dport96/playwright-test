@@ -3,10 +3,15 @@
 import { request } from '@playwright/test';
 
 async function globalSetup() {
-  const requestContext = await request.newContext();
+  const baseURL = process.env.BASE_URL || 'http://localhost:3000';
+  console.log(`Using base URL: ${baseURL}`);
+
+  const requestContext = await request.newContext({
+    baseURL,
+  });
 
   try {
-    await requestContext.post(`${process.env.BASE_URL}/api/test-setup`, {
+    await requestContext.post('/api/test-setup', {
       data: {
         users: [
           {
@@ -17,6 +22,10 @@ async function globalSetup() {
         ],
       },
     });
+    console.log('Test data seeded successfully');
+  } catch (error) {
+    console.error('Test data seeding failed:', error);
+    throw error;
   } finally {
     await requestContext.dispose();
   }
