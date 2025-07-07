@@ -9,7 +9,12 @@
     "start": "next start",
     "lint": "next lint",
     "playwright-development": "npx playwright test",
-    "playwright-ci": "next dev && npx playwright test"
+    "playwright-ci": "next dev && npx playwright test",
+    "db:up": "docker-compose up -d postgres",
+    "db:down": "docker-compose down",
+    "db:setup": "npx prisma migrate deploy && npx prisma db seed",
+    "test:setup": "npm run db:up && npm run db:setup",
+    "test:full": "npm run test:setup && npm run playwright-development"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"

@@ -22,9 +22,9 @@ async function globalSetup() {
         ],
       },
     });
-    console.log('Test data seeded successfully');
+    console.log('Successfully found test user john@foo.com in DB');
   } catch (error) {
-    console.error('Test data seeding failed:', error);
+    console.error('Could not find test user john@foo.com in DB:', error);
     throw error;
   } finally {
     await requestContext.dispose();
