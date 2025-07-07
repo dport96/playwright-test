@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-async function POST(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const { users } = await request.json();
 
@@ -33,6 +33,3 @@ async function POST(request: NextRequest) {
     );
   }
 }
-
-export default POST;
-export { POST };
