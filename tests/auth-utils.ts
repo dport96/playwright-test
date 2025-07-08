@@ -159,7 +159,14 @@ async function authenticateWithUI(page: Page, email: string, password: string, s
 
   // Save updated session
   const cookies = await page.context().cookies();
-  const localStorage = await page.evaluate(() => JSON.stringify(window.localStorage));
+  let localStorage = '{}';
+  try {
+    // Wait for page to be ready and try to get localStorage
+    await page.waitForLoadState('networkidle');
+    localStorage = await page.evaluate(() => JSON.stringify(window.localStorage));
+  } catch (error) {
+    console.log('Warning: Could not read localStorage, using empty object');
+  }
   fs.writeFileSync(sessionPath, JSON.stringify({ cookies, localStorage }));
 }
 

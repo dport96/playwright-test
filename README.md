@@ -90,5 +90,7 @@ The application includes two GitHub Actions workflows:
 - `npm run db:setup` - Run migrations and seed database
 - `npm run test:setup` - Start DB and setup schema
 - `npm run test:full` - Complete test setup and run tests
+- `npm run test:fast` - Run tests with faster timeouts (fail faster)
+- `npm run playwright-fast` - Run Playwright tests with CI timeouts locally
 
 For details, please see [the documentation](http://ics-software-engineering.github.io/nextjs-application-template/).
